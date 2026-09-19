@@ -2,15 +2,22 @@ import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../utils/firebase";
 import api from "../../utils/axios";
 import { FcGoogle } from "react-icons/fc";
+import { useDispatch, useSelector } from "react-redux";
+import { setUserdata } from "../redux/userSlice";
 
-function home() {
+function Home() {
+  const { userData } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
+  console.log(userData);
+
   const handleLogin = async (token) => {
     try {
       const { data } = await api.post("/api/auth/login", {
         token,
       });
 
-      console.log(data);
+      dispatch(setUserdata(data.user));
     } catch (error) {
       console.log(error);
     }
@@ -22,8 +29,6 @@ function home() {
 
       const token = await data.user.getIdToken();
 
-      console.log("Firebase token:", token);
-
       await handleLogin(token);
 
       console.log("Google user:", data.user);
@@ -31,32 +36,34 @@ function home() {
       console.error("Google login error:", error);
     }
   };
+
   return (
     <div className="h-screen bg-black flex text-white overflow-hidden">
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div className="w-85 bg-[#13151c] border border-white/8 rounded-2xl p-7 flex flex-col gap-5">
-          <div className="flex flex-col gap-1   ">
-            <h2 className="text-[17px] font-semibold text-slate-100 tracking-tight">
-              Welcome to Nexora
-            </h2>
-            <p className="text-[13px] text-slate-500">
-              Please Login to continue using app
-            </p>
+      {!userData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-85 bg-[#13151c] border border-white/8 rounded-2xl p-7 flex flex-col gap-5">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-[17px] font-semibold text-slate-100 tracking-tight">
+                Welcome to Nexora
+              </h2>
+
+              <p className="text-[13px] text-slate-500">
+                Please Login to continue using app
+              </p>
+            </div>
+
+            <button
+              className="w-full flex items-center justify-center gap-3 py-2.75 rounded-xl text-sm font-medium text-white bg-black active:from-indigo-600 active:to-violet-800 border border-indigo-500/30 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all duration-150 cursor-pointer"
+              onClick={googleLogin}
+            >
+              <FcGoogle size={15} />
+              Continue with Google
+            </button>
           </div>
-          <button
-            className="w-full flex items-center justify-center gap-3 py-2.75 rounded-xl
-text-sm font-medium text-white bg-black  active:from-indigo-600 active:to-violet-800
-border border-indigo-500/30 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30
-transition-all duration-150 cursor-pointer"
-            onClick={googleLogin}
-          >
-            <FcGoogle size={15} className="text-white" />
-            Continue with Google
-          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
 
-export default home;
+export default Home;
