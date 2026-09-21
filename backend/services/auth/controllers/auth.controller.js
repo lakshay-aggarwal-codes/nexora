@@ -28,7 +28,7 @@ export const login = async (req, res) => {
     await redis.set(
       `session-${sessionId}`,
       JSON.stringify({
-        userID: user._id,
+        userId: user._id,
         name: user.name,
         email: user.email,
         avatar: user.avatar,
