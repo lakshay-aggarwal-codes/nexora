@@ -1,9 +1,12 @@
 import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../../utils/firebase";
-import api from "../../utils/axios";
+import { auth, googleProvider } from "../../utils/firebase.js";
+import api from "../../utils/axios.js";
 import { FcGoogle } from "react-icons/fc";
 import { useDispatch, useSelector } from "react-redux";
-import { setUserdata } from "../redux/userSlice";
+import { setUserdata } from "../redux/userSlice.js";  
+import Sidebar from "../components/sidebar";
+import ChatArea from "../components/chatArea";
+import Artifact from "../components/artifact";
 
 function Home() {
   const { userData } = useSelector((state) => state.user);
@@ -37,8 +40,13 @@ function Home() {
     }
   };
 
-  return (
-    <div className="h-screen bg-black flex text-white overflow-hidden">
+  return ( 
+      <div className="h-screen w-screen grid grid-cols-[270px_minmax(0,1fr)_400px] overflow-hidden bg-black text-white">
+
+      <Sidebar />
+      <ChatArea />
+      <Artifact />
+
       {!userData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="w-85 bg-[#13151c] border border-white/8 rounded-2xl p-7 flex flex-col gap-5">

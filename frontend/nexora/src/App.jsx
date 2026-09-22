@@ -5,17 +5,17 @@ import { useDispatch } from "react-redux";
 import { setUserdata } from "./redux/userSlice";
 
 function App() {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   useEffect(() => {
     const getUser = async () => {
-     const data = await getCurrentUser();
-     dispatch(setUserdata(data))
+      const data = await getCurrentUser();
+      dispatch(setUserdata(data));
     };
     getUser();
   }, [dispatch]);
   return (
     <>
-      <Home />  
+      <Home />
     </>
   );
 }
