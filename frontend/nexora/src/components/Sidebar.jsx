@@ -41,9 +41,11 @@ function Sidebar() {
   }, [userData?._id, dispatch]);
 
   const handleCreateConversation = async () => {
-    const data = await createConversation();
-    dispatch(addConversation(data));
-  };
+  const data = await createConversation();
+
+  dispatch(addConversation(data));
+  dispatch(setSelectedConversation(data));
+};
 
   if (collapse) {
     return (

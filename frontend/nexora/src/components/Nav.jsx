@@ -1,31 +1,46 @@
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, MoreHorizontal } from "lucide-react";
 import { useSelector } from "react-redux";
 
 function Nav() {
-  const { selectedConversation } = useSelector((state) => state.conversations);
-  const { messages } = useSelector((state) => state.message);
+  const { selectedConversation } = useSelector(
+    (state) => state.conversations
+  );
+
+  const { messages = [] } = useSelector((state) => state.message);
+
   return (
-<> 
-    {selectedConversation && 
-    <div className="h-14 flex items-center gap-2.5 px-5 border-b border-white/6 bg-[#0d0f14]">
-      <div
-        className="flex items-center w-7 h-7 rounded-lg bg-indigo-500/10 border
-       border-indigo-500/10"
-      >
-        <MessageSquare size={13} className="text-indigo-400" />
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/5 bg-[#212121] px-4">
+      <div className="flex min-w-0 items-center gap-2.5">
+        {selectedConversation && (
+          <>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
+              <MessageSquare size={15} className="text-slate-400" />
+            </div>
+
+            <div className="min-w-0">
+              <div className="truncate text-sm font-medium text-slate-100">
+                {selectedConversation.title || "New Chat"}
+              </div>
+
+              {messages.length > 0 && (
+                <div className="text-[11px] text-slate-500">
+                  {messages.length} messages
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="text-[14px] font-semibold text-slate-100 tracking-tight">
-        {selectedConversation?.title || "New Chat"}
-      </div>
-      <div
-        className="text-[10px] font-medium text-slate-600 border border-white/60
-       py-2.5 rounded-full px-2"
+      <button
+        type="button"
+        className="flex h-8 w-8 items-center justify-center rounded-lg
+        text-slate-400 transition hover:bg-white/5 hover:text-white
+        cursor-pointer"
       >
-        {messages?.length} Messages
-      </div>
-    </div>}
-    </>
+        <MoreHorizontal size={18} />
+      </button>
+    </header>
   );
 }
 

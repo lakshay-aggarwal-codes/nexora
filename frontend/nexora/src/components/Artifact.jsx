@@ -1,6 +1,10 @@
 function Artifact() {
   return (
-    <div className="h-full bg-[#0d0f14] border-l border-white/10 overflow-hidden">
+    <div
+      className="grid h-screen w-screen grid-cols-[270px_minmax(0,1fr)_minmax(0,320px)] 
+overflow-hidden bg-[#212121] text-white"
+    >
+      {" "}
       artifact
     </div>
   );
