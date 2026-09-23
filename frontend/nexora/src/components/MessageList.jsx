@@ -1,12 +1,17 @@
 import { useSelector } from "react-redux";
 import MessageBubble from "./MessageBubble";
+import useSendMessage from "../hooks/useSendMessage";
 
-function MessageList() {
+function MessageList({ bottomRef }) {
   const { selectedConversation } = useSelector(
     (state) => state.conversations
   );
 
-  const { messages = [] } = useSelector((state) => state.message);
+  const { messages = [] } = useSelector(
+    (state) => state.message
+  );
+
+  const { retryLast } = useSendMessage();
 
   const suggestions = [
     "Explain Redis",
@@ -37,10 +42,9 @@ function MessageList() {
                 <button
                   key={suggestion}
                   type="button"
-                  className="rounded-xl border border-white/10 bg-white/4
+                  className="cursor-pointer rounded-xl border border-white/10 bg-white/4
                   px-4 py-3 text-left text-sm text-slate-300
-                  transition hover:bg-white/8 hover:text-white
-                  cursor-pointer"
+                  transition hover:bg-white/8 hover:text-white"
                 >
                   {suggestion}
                 </button>
@@ -51,14 +55,34 @@ function MessageList() {
       ) : (
         <div className="mx-auto w-full max-w-3xl px-4 py-8">
           <div className="space-y-8">
-            {messages.map((msg, index) => (
-              <MessageBubble
-                key={msg?._id || index}
-                role={msg?.role}
-                content={msg?.content}
-              />
-            ))}
+            {messages.map((msg, index) => {
+              const isLastAssistant =
+                msg?.role === "assistant" &&
+                index === messages.length - 1;
+
+              const prevUserPrompt =
+                isLastAssistant && index > 0
+                  ? messages[index - 1]?.content
+                  : null;
+
+              return (
+                <MessageBubble
+                  key={msg?._id || index}
+                  role={msg?.role}
+                  content={msg?.content}
+                  pending={msg?.pending}
+                  error={msg?.error}
+                  showRetry={isLastAssistant}
+                  onRetry={() =>
+                    prevUserPrompt && retryLast(prevUserPrompt)
+                  }
+                />
+              );
+            })}
           </div>
+
+          {/* Scroll target */}
+          <div ref={bottomRef} />
         </div>
       )}
     </div>
