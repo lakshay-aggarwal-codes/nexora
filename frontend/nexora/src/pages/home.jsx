@@ -3,16 +3,15 @@ import { auth, googleProvider } from "../../utils/firebase.js";
 import api from "../../utils/axios.js";
 import { FcGoogle } from "react-icons/fc";
 import { useDispatch, useSelector } from "react-redux";
-import { setUserdata } from "../redux/userSlice.js";  
+import { setUserdata } from "../redux/userSlice.js";
 import Sidebar from "../components/Sidebar";
 import ChatArea from "../components/ChatArea";
 import Artifact from "../components/Artifact";
 
 function Home() {
   const { userData } = useSelector((state) => state.user);
+  const { isOpen: isArtifactOpen } = useSelector((state) => state.artifact);
   const dispatch = useDispatch();
-
-  console.log(userData);
 
   const handleLogin = async (token) => {
     try {
@@ -33,19 +32,26 @@ function Home() {
       const token = await data.user.getIdToken();
 
       await handleLogin(token);
-
-      console.log("Google user:", data.user);
     } catch (error) {
       console.error("Google login error:", error);
     }
   };
 
-  return ( 
-      <div className="h-screen w-screen grid grid-cols-[270px_minmax(0,1fr)_400px] overflow-hidden bg-black text-white">
-
+  return (
+    <div
+      className={`h-screen w-screen grid overflow-hidden bg-black text-white ${
+        isArtifactOpen
+          ? "grid-cols-[270px_minmax(0,1fr)_400px]"
+          : "grid-cols-[270px_minmax(0,1fr)]"
+      }`}
+    >
       <Sidebar />
       <ChatArea />
-      <Artifact />
+      {isArtifactOpen && (
+        <div className="h-full min-w-0 overflow-hidden">
+          <Artifact />
+        </div>
+      )}
 
       {!userData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">

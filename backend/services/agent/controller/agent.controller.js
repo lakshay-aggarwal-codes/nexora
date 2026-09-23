@@ -1,18 +1,23 @@
 import axios from "axios";
 import { graph } from "../graph/graph.js";
 import { generateTitle } from "../utils/generateTitle.js";
+import { addMessage } from "../config/memory.js";
 
 export const agent = async (req, res) => {
   try {
-    const { prompt, conversationId, generateTitle: shouldGenerateTitle } =
-      req.body;
- 
+    const {
+      prompt,
+      conversationId,
+      generateTitle: shouldGenerateTitle,
+    } = req.body;
+
     const tasks = [
       axios.post(`${process.env.CHAT_SERVICE}/save-message`, {
         conversationId,
         role: "user",
         content: prompt,
       }),
+
       graph.invoke({
         prompt,
         conversationId,
@@ -23,26 +28,40 @@ export const agent = async (req, res) => {
       tasks.push(generateTitle(prompt));
     }
 
-    const [, result, title] = await Promise.all(tasks);
+    const results = await Promise.all(tasks);
 
-    const aiResponse = result.aiResponse;
+    const chatSaveResult = results[0];
+    const graphResult = results[1];
+    const title = shouldGenerateTitle ? results[2] : undefined;
 
+    const aiResponse = graphResult.aiResponse;
+
+    // Save user message to memory
+    await addMessage(conversationId, "user", prompt);
+
+    // Save assistant message to memory
+    await addMessage(conversationId, "assistant", aiResponse);
+
+    // Save assistant message to chat service
     await axios.post(`${process.env.CHAT_SERVICE}/save-message`, {
       conversationId,
       role: "assistant",
       content: aiResponse,
     });
 
+    // Update conversation title
     if (shouldGenerateTitle && title) {
-      // Fire-and-forget: don't make the user wait on this write.
-      axios
+      await axios
         .post(`${process.env.CHAT_SERVICE}/update-conversation`, {
           id: conversationId,
           title,
         })
-        .catch((err) =>
-          console.error("Failed to persist generated title:", err.message),
-        );
+        .catch((err) => {
+          console.error(
+            "Failed to persist generated title:",
+            err.message
+          );
+        });
     }
 
     return res.status(200).json({

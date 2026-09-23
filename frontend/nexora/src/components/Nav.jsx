@@ -1,5 +1,6 @@
-import { MessageSquare, MoreHorizontal } from "lucide-react";
-import { useSelector } from "react-redux";
+import { MessageSquare, PanelRight } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleArtifact } from "../redux/artifactSlice";
 
 function Nav() {
   const { selectedConversation } = useSelector(
@@ -7,6 +8,8 @@ function Nav() {
   );
 
   const { messages = [] } = useSelector((state) => state.message);
+  const { isOpen: isArtifactOpen } = useSelector((state) => state.artifact);
+  const dispatch = useDispatch();
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/5 bg-[#212121] px-4">
@@ -34,11 +37,16 @@ function Nav() {
 
       <button
         type="button"
-        className="flex h-8 w-8 items-center justify-center rounded-lg
-        text-slate-400 transition hover:bg-white/5 hover:text-white
-        cursor-pointer"
+        onClick={() => dispatch(toggleArtifact())}
+        title={isArtifactOpen ? "Hide artifact panel" : "Show artifact panel"}
+        className={`flex h-8 w-8 items-center justify-center rounded-lg
+        transition cursor-pointer ${
+          isArtifactOpen
+            ? "bg-white/10 text-white"
+            : "text-slate-400 hover:bg-white/5 hover:text-white"
+        }`}
       >
-        <MoreHorizontal size={18} />
+        <PanelRight size={17} />
       </button>
     </header>
   );
