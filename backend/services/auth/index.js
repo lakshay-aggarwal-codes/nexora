@@ -5,7 +5,7 @@ import router from "./routes/auth.routes.js";
 
 dotenv.config();
 
-const port = process.env.PORT || 8001;
+const port = process.env.PORT || 8001; // gateway=8000, auth=8001, chat=8002, agent=8003
 
 const app = express();
 app.use(express.json());

@@ -1,11 +1,20 @@
 import { Mic, Paperclip, ArrowUp } from "lucide-react";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import sendMessage from "../features/sendMessage";
+import { createConversation } from "../features/createConversation";
+import {
+  addConversation,
+  renameConversationInStore,
+  setSelectedConversation,
+} from "../redux/conversationSlice";
+import { addMessage, updateLastMessage } from "../redux/messageSlice";
 
 function ChatInput() {
   const [value, setValue] = useState("");
   const [isSending, setIsSending] = useState(false);
+
+  const dispatch = useDispatch();
 
   const { selectedConversation } = useSelector(
     (state) => state.conversations
@@ -14,40 +23,78 @@ function ChatInput() {
   const handleSendMessage = async () => {
     const prompt = value.trim();
 
-    console.log("SEND FUNCTION CALLED");
-    console.log("Prompt:", prompt);
-    console.log("Selected conversation:", selectedConversation);
-
-    if (!prompt) {
-      console.log("No message to send");
+    if (!prompt || isSending) {
       return;
     }
 
-    const payload = {
-      prompt,
-      conversationId: selectedConversation?._id,
-    };
-
-    console.log("Payload:", payload);
-
     try {
       setIsSending(true);
+ 
+      let conversation = selectedConversation;
+      if (!conversation?._id) {
+        conversation = await createConversation();
+        dispatch(addConversation(conversation));
+        dispatch(setSelectedConversation(conversation));
+      }
+ 
+      dispatch(
+        addMessage({
+          role: "user",
+          content: prompt,
+          _id: `local-${Date.now()}`,
+        })
+      );
+      setValue("");
+ 
+      dispatch(
+        addMessage({
+          role: "assistant",
+          content: "Thinking...",
+          _id: `local-pending-${Date.now()}`,
+          pending: true,
+        })
+      ); 
+      const needsTitle =
+        !conversation.title || conversation.title === "New Chat";
+
+      const payload = {
+        prompt,
+        conversationId: conversation._id,
+        generateTitle: needsTitle,
+      };
 
       const data = await sendMessage(payload);
-
-      console.log("Server response:", data);
-
-      setValue("");
+ 
+      dispatch(
+        updateLastMessage({
+          content: typeof data === "string" ? data : data?.content ?? data,
+          pending: false,
+        })
+      );
+      
+      if (data?.title) {
+        dispatch(
+          renameConversationInStore({
+            id: conversation._id,
+            title: data.title,
+          })
+        );
+      }
     } catch (error) {
       console.error("Failed to send message:", error);
+      dispatch(
+        updateLastMessage({
+          content: "Something went wrong. Please try again.",
+          pending: false,
+          error: true,
+        })
+      );
     } finally {
       setIsSending(false);
     }
   };
 
   const handleKeyDown = (e) => {
-    console.log("KEY:", e.key);
-
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();

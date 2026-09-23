@@ -19,6 +19,7 @@ import {
 import { createConversation } from "../features/createConversation";
 import logOut from "../features/logOut.js";
 import { setUserdata } from "../redux/userSlice.js";
+import ConversationItem from "./ConversationItem";
 
 function Sidebar() {
   const [collapse, setCollapsed] = useState(false);
@@ -41,11 +42,14 @@ function Sidebar() {
   }, [userData?._id, dispatch]);
 
   const handleCreateConversation = async () => {
-  const data = await createConversation();
+    const data = await createConversation();
 
-  dispatch(addConversation(data));
-  dispatch(setSelectedConversation(data));
-};
+    dispatch(addConversation(data));
+    dispatch(setSelectedConversation(data));
+  };
+
+  const pinnedConversations = conversations.filter((c) => c.pinned);
+  const unpinnedConversations = conversations.filter((c) => !c.pinned);
 
   if (collapse) {
     return (
@@ -106,23 +110,23 @@ function Sidebar() {
         </div>
 
         <div className="relative shrink-0">
-                  {userData?.avatar && !imageError ? (
-                    <img
-                      src={userData.avatar}
-                      alt="image"
-                      className="w-9 h-9 rounded-[10px] object-cover
-                      border-2 border-indigo-500/25"
-                      onError={() => setImageError(true)}
-                    />
-                  ) : (
-                    <div
-                      className="flex items-center justify-center w-9 h-9
-                      rounded-[10px] border-2 border-indigo-500/25"
-                    >
-                      <User size={15} className="text-slate-400" />
-                    </div>
-                  )}
-                </div>
+          {userData?.avatar && !imageError ? (
+            <img
+              src={userData.avatar}
+              alt="image"
+              className="w-9 h-9 rounded-[10px] object-cover
+              border-2 border-indigo-500/25"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div
+              className="flex items-center justify-center w-9 h-9
+              rounded-[10px] border-2 border-indigo-500/25"
+            >
+              <User size={15} className="text-slate-400" />
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -176,8 +180,32 @@ function Sidebar() {
           </button>
         </div>
 
+        {/* Pinned */}
+        <div
+          className="px-5 pt-4 pb-1.5 text-[10.5px] font-semibold uppercase
+          tracking-widest text-slate-600"
+        >
+          Pinned
+        </div>
+
+        <div className="px-2.5">
+          {pinnedConversations.length === 0 ? (
+            <div className="px-3 py-2 text-[12px] text-slate-600">
+              No pinned chats
+            </div>
+          ) : (
+            pinnedConversations.map((conv) => (
+              <ConversationItem
+                key={conv._id}
+                conv={conv}
+                isActive={selectedConversation?._id === conv?._id}
+              />
+            ))
+          )}
+        </div>
+
         {/* Recents Heading */}
-        {conversations.length === 0 ? (
+        {unpinnedConversations.length === 0 ? (
           <div
             className="px-5 pt-4 pb-1.5 text-[10.5px] font-semibold uppercase
             tracking-widest text-slate-600"
@@ -198,42 +226,13 @@ function Sidebar() {
           className="flex-1 overflow-y-auto px-2.5 pb-2
           [&::-webkit-scrollbar]:hidden"
         >
-          {conversations.map((conv) => {
-            const isActive = selectedConversation?._id === conv?._id;
-
-            return (
-              <div
-                key={conv._id}
-                onClick={() => dispatch(setSelectedConversation(conv))}
-                className={`flex items-center gap-2.5 cursor-pointer
-                mb-0.5 px-3 py-2.5 rounded-[10px] border
-                transition-colors duration-150 ${
-                  isActive
-                    ? "bg-indigo-500/10 border-indigo-500/18"
-                    : "bg-transparent border-transparent"
-                }`}
-              >
-                <div
-                  className={`flex items-center justify-center shrink-0 w-7 h-7
-                  rounded-lg transition-colors duration-150 ${
-                    isActive
-                      ? "bg-indigo-500/15 border-indigo-400"
-                      : "bg-white/5 text-slate-500"
-                  }`}
-                >
-                  <MessageSquare size={13} />
-                </div>
-
-                <span
-                  className={`text-[13px] font-medium truncate ${
-                    isActive ? "text-slate-100" : "text-slate-300"
-                  }`}
-                >
-                  {conv.title || "New Chat"}
-                </span>
-              </div>
-            );
-          })}
+          {unpinnedConversations.map((conv) => (
+            <ConversationItem
+              key={conv._id}
+              conv={conv}
+              isActive={selectedConversation?._id === conv?._id}
+            />
+          ))}
         </div>
 
         {/* User Section */}

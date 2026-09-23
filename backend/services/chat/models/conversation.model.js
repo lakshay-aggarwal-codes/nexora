@@ -9,6 +9,10 @@ const conversationSchema = new mongoose.Schema(
     userId: {
       type: String,
     },
+    pinned: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

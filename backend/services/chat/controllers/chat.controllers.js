@@ -43,6 +43,33 @@ export const updateConversation = async (req, res) => {
   }
 };
 
+export const deleteConversation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Conversation.findByIdAndDelete(id);
+    await Message.deleteMany({ conversationId: id });
+    return res.status(200).json({ message: "Conversation deleted" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Delete Conversation error ${error}` });
+  }
+};
+
+export const pinConversation = async (req, res) => {
+  try {
+    const { id, pinned } = req.body;
+    const conversation = await Conversation.findByIdAndUpdate(
+      id,
+      { pinned },
+      { new: true },
+    );
+    return res.status(200).json(conversation);
+  } catch (error) {
+    return res.status(500).json({ message: `Pin Conversation error ${error}` });
+  }
+};
+
 export const saveMessage = async (req, res) => {
   try {
     const { conversationId, role, content } = req.body;

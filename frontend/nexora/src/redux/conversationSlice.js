@@ -20,9 +20,44 @@ const conversationSlice = createSlice({
     setSelectedConversation: (state, action) => {
       state.selectedConversation = action.payload;
     },
-  },
-}); 
 
-export const { setConversations, addConversation , setSelectedConversation } = conversationSlice.actions;
+    removeConversation: (state, action) => {
+      const id = action.payload;
+      state.conversations = state.conversations.filter(
+        (c) => c._id !== id,
+      );
+      if (state.selectedConversation?._id === id) {
+        state.selectedConversation = null;
+      }
+    },
+
+    renameConversationInStore: (state, action) => {
+      const { id, title } = action.payload;
+      const conv = state.conversations.find((c) => c._id === id);
+      if (conv) conv.title = title;
+      if (state.selectedConversation?._id === id) {
+        state.selectedConversation.title = title;
+      }
+    },
+
+    setConversationPinned: (state, action) => {
+      const { id, pinned } = action.payload;
+      const conv = state.conversations.find((c) => c._id === id);
+      if (conv) conv.pinned = pinned;
+      if (state.selectedConversation?._id === id) {
+        state.selectedConversation.pinned = pinned;
+      }
+    },
+  },
+});
+
+export const {
+  setConversations,
+  addConversation,
+  setSelectedConversation,
+  removeConversation,
+  renameConversationInStore,
+  setConversationPinned,
+} = conversationSlice.actions;
 
 export default conversationSlice.reducer;
