@@ -23,9 +23,7 @@ const conversationSlice = createSlice({
 
     removeConversation: (state, action) => {
       const id = action.payload;
-      state.conversations = state.conversations.filter(
-        (c) => c._id !== id,
-      );
+      state.conversations = state.conversations.filter((c) => c._id !== id);
       if (state.selectedConversation?._id === id) {
         state.selectedConversation = null;
       }
@@ -48,6 +46,16 @@ const conversationSlice = createSlice({
         state.selectedConversation.pinned = pinned;
       }
     },
+
+    setConvTitle: (state, action) => {
+      const { title, conversationId } = action.payload;
+      state.conversations = state.conversations.map((conv) =>
+        conv._id == conversationId ? { ...conv, title } : conv,
+      );
+      if(state.selectedConversation?._id == conversationId){
+        state.selectedConversation = {...state.selectedConversation, title}
+      }
+    },
   },
 });
 
@@ -58,6 +66,7 @@ export const {
   removeConversation,
   renameConversationInStore,
   setConversationPinned,
+  setConvTitle
 } = conversationSlice.actions;
 
 export default conversationSlice.reducer;
