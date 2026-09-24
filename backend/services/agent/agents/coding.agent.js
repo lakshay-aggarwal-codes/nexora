@@ -1,4 +1,6 @@
 import { getModel } from "../config/llmModel.js";
+import { getMemory } from "../config/memory.js";
+import { buildMessages } from "../utils/buildMessages.js";
  
 const extractCodeBlock = (text) => {
   const match = text.match(/```(\w+)?\n([\s\S]*?)```/);
@@ -21,10 +23,15 @@ export const codingAgent = async (state) => {
     "opening backticks (e.g. ```javascript). Briefly explain the code " +
     "outside the block.";
 
-  const response = await llm.invoke([
-    { role: "system", content: systemPrompt },
-    { role: "human", content: state.prompt },
-  ]);
+  const history = state.history ?? (await getMemory(state.conversationId));
+
+  const response = await llm.invoke(
+    buildMessages({
+      systemPrompt: systemPrompt + (state.memoryContext || ""),
+      history,
+      prompt: state.prompt,
+    }),
+  );
 
   const artifact = extractCodeBlock(response.content);
 

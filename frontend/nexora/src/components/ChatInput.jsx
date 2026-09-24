@@ -2,11 +2,6 @@ import { Mic, Paperclip, ArrowUp, Square } from "lucide-react";
 import { useState } from "react";
 import useSendMessage from "../hooks/useSendMessage";
 import useSpeechToText from "../hooks/useSpeechToText";
-import { useDispatch, useSelector } from "react-redux";
-import { createConversation } from "../features/createConversation";
-import { addConversation, setConvTitle, setSelectedConversation } from "../redux/conversationSlice";
-import sendMessage from "../features/sendMessage";
-import { updateConversation } from "../features/updateConversation";
 
 function ChatInput() {
   const [value, setValue] = useState("");
@@ -14,25 +9,10 @@ function ChatInput() {
   const { isListening, isSupported, startListening, stopListening } =
     useSpeechToText({ onResult: setValue });
 
-  const dispatch = useDispatch();
-  const { selectedConversation } = useSelector((state) => state.conversation);
+  // useSendMessage already does everything: creates the conversation if there
+  // isn't one, asks the backend for a title, calls /api/agent/chat once, and
+  // updates the UI. Don't duplicate any of that here.
   const handleSendMessage = async () => {
-    let conversation = selectedConversation
-    if (!conversation) {
-      const conv = await createConversation();
-      dispatch(setSelectedConversation(conv));
-      dispatch(addConversation(conv))
-      conversation=conv
-    }
-
-    if(conversation.title == 'New Chat'){
-      await updateConversation({id:conversation?._id,title:value.trim()})
-      dispatch(setConvTitle({conversationId:conversation._id, title:value.slice(0,40)}))
-    }
-    const payload={
-      prompt:value.trim(),conversationId:conversation?._id
-    }
-    await sendMessage(payload)
     const prompt = value.trim();
     if (!prompt || isSending) return;
     if (isListening) stopListening();

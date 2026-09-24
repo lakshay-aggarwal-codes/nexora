@@ -32,7 +32,9 @@ function useSendMessage() {
       if (!conversation?._id) {
         conversation = await createConversation();
         dispatch(addConversation(conversation));
-        dispatch(setSelectedConversation(conversation));
+        // dispatch(setSelectedConversation(conversation));
+                // isNew: tells ChatArea not to fetch messages for a brand-new chat
+        dispatch(setSelectedConversation({ ...conversation, isNew: true }));
       }
 
       dispatch(

@@ -21,7 +21,10 @@ function ChatArea() {
         dispatch(setMessages([]));
         return;
       }
-
+      if (selectedConversation.isNew) {
+        setLoadingMessages(false);
+        return;
+      }
       setLoadingMessages(true);
       try {
         const data = await getMessages(selectedConversation._id);

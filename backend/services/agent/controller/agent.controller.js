@@ -1,7 +1,12 @@
 import axios from "axios";
 import { graph } from "../graph/graph.js";
 import { generateTitle } from "../utils/generateTitle.js";
-import { addMessage } from "../config/memory.js";
+import { addMessage, getMemory } from "../config/memory.js";
+import {
+  buildMemoryPrompt,
+  loadUserMemory,
+  updateMemoryFromTurn,
+} from "../memory/index.js";
 
 export const agent = async (req, res) => {
   try {
@@ -10,6 +15,13 @@ export const agent = async (req, res) => {
       conversationId,
       generateTitle: shouldGenerateTitle,
     } = req.body;
+ 
+    const userId = req.headers["x-user-id"];
+ 
+    const [history, memory] = await Promise.all([
+      getMemory(conversationId),
+      loadUserMemory(userId), // never throws; degrades to "no memory"
+    ]);
 
     const tasks = [
       axios.post(`${process.env.CHAT_SERVICE}/save-message`, {
@@ -21,6 +33,9 @@ export const agent = async (req, res) => {
       graph.invoke({
         prompt,
         conversationId,
+        userId,
+        history,
+        memoryContext: buildMemoryPrompt(memory),
       }),
     ];
 
@@ -64,10 +79,19 @@ export const agent = async (req, res) => {
         });
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       content: aiResponse,
       title: shouldGenerateTitle ? title : undefined,
     });
+ 
+    void updateMemoryFromTurn({
+      userId,
+      conversationId,
+      history,
+      prompt,
+      aiResponse,
+    });
+    return;
   } catch (error) {
     console.error("Agent error:", error);
 

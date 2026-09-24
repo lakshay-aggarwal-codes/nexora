@@ -1,10 +1,10 @@
-import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { getModel } from "../config/llmModel.js";
 import { getMemory } from "../config/memory.js";
+import { buildMessages } from "../utils/buildMessages.js";
 
 export const chatAgent = async (state) => {
   const llm = await getModel("chat");
-  const history = await getMemory(state.conversationId);
+  const history = state.history ?? (await getMemory(state.conversationId));
 
   const systemPrompt = `
 You are Nexora, an intelligent AI assistant.
@@ -62,27 +62,14 @@ Technical/detailed question → structured Markdown, short sections, bullets, an
 
 Always prioritize clarity, readability, and usefulness over unnecessary verbosity.
 `;
-  const messages = [new SystemMessage(systemPrompt)];
-  history.forEach((msg) => {
-    if (msg.role == "user") {
-      messages.push(new HumanMessage(msg.content));
-    } else {
-      messages.push(new AIMessage(msg.content));
-    }
+  // Long-term memory about this user (empty string if none / turned off).
+  const messages = buildMessages({
+    systemPrompt: systemPrompt + (state.memoryContext || ""),
+    history,
+    prompt: state.prompt,
   });
 
-  messages.push(new HumanMessage(state.prompt))
-console.log(messages)
-  const response = await llm.invoke([
-    {
-      role: "system",
-      content: systemPrompt,
-    },
-    {
-      role: "human",
-      content: state.prompt,
-    },
-  ]);
+  const response = await llm.invoke(messages);
 
   return {
     ...state,
