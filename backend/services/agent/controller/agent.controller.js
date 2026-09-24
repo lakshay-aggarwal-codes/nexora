@@ -13,6 +13,7 @@ export const agent = async (req, res) => {
     const {
       prompt,
       conversationId,
+      agent,
       generateTitle: shouldGenerateTitle,
     } = req.body;
  
@@ -20,7 +21,7 @@ export const agent = async (req, res) => {
  
     const [history, memory] = await Promise.all([
       getMemory(conversationId),
-      loadUserMemory(userId), // never throws; degrades to "no memory"
+      loadUserMemory(userId),  
     ]);
 
     const tasks = [
@@ -33,6 +34,7 @@ export const agent = async (req, res) => {
       graph.invoke({
         prompt,
         conversationId,
+        agent,
         userId,
         history,
         memoryContext: buildMemoryPrompt(memory),

@@ -1,23 +1,33 @@
-import { Mic, Paperclip, ArrowUp, Square } from "lucide-react";
+import {
+  Mic,
+  Paperclip,
+  ArrowUp,
+  Square,
+  Zap,
+  MessageSquare,
+  Code2,
+  FileText,
+  Presentation,
+  Globe,
+  ImageIcon,
+} from "lucide-react";
 import { useState } from "react";
 import useSendMessage from "../hooks/useSendMessage";
 import useSpeechToText from "../hooks/useSpeechToText";
 
 function ChatInput() {
   const [value, setValue] = useState("");
+  const [selectedAgent, setSelectedAgent] = useState("Auto");
   const { sendPrompt, isSending } = useSendMessage();
   const { isListening, isSupported, startListening, stopListening } =
     useSpeechToText({ onResult: setValue });
 
-  // useSendMessage already does everything: creates the conversation if there
-  // isn't one, asks the backend for a title, calls /api/agent/chat once, and
-  // updates the UI. Don't duplicate any of that here.
   const handleSendMessage = async () => {
     const prompt = value.trim();
     if (!prompt || isSending) return;
     if (isListening) stopListening();
     setValue("");
-    await sendPrompt(prompt);
+    await sendPrompt(prompt, { agent: selectedAgent.toLowerCase() });
   };
 
   const handleKeyDown = (e) => {
@@ -35,10 +45,69 @@ function ChatInput() {
     }
   };
 
+  const agents = [
+    {
+      id: "auto",
+      icon: Zap,
+      label: "Auto",
+    },
+    {
+      id: "chat",
+      icon: MessageSquare,
+      label: "Chat",
+    },
+    {
+      id: "coding",
+      icon: Code2,
+      label: "coding",
+    },
+    {
+      id: "pdf",
+      icon: FileText,
+      label: "PDF",
+    },
+    {
+      id: "ppt",
+      icon: Presentation,
+      label: "PPT",
+    },
+    {
+      id: "image",
+      icon: ImageIcon,
+      label: "Image",
+    },
+    {
+      id: "search",
+      icon: Globe,
+      label: "Search",
+    },
+  ];
+
   return (
     <div className="shrink-0 bg-[#212121] px-3 pb-5 pt-3 sm:px-4">
       <div className="mx-auto w-full max-w-3xl">
         <div className="rounded-2xl border border-white/10 bg-[#2f2f2f]">
+          <div className="flex w-[80%] gap-2 pr-2 flex-wrap">
+            {agents.map((agent) => {
+              const isActive = selectedAgent === agent.label;
+              const Icon = agent.icon;
+              return (
+                <div
+                  key={agent.id}
+                  onClick={() => setSelectedAgent(agent.label)}
+                  className={`flex cursor-pointer items-center gap-1.5 rounded-full border
+        px-3 py-1 text-xs font-medium capitalize transition select-none ${
+          isActive
+            ? "border-blue-500/60 bg-blue-500/20 text-blue-300"
+            : "border-white/10 bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
+        }`}
+                >
+                  <Icon size={14} />
+                  {agent.label}
+                </div>
+              );
+            })}
+          </div>
           <textarea
             value={value}
             onChange={(e) => setValue(e.target.value)}
