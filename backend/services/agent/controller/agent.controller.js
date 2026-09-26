@@ -52,21 +52,18 @@ export const agent = async (req, res) => {
     const title = shouldGenerateTitle ? results[2] : undefined;
 
     const aiResponse = graphResult.aiResponse;
-
-    // Save user message to memory
+ 
     await addMessage(conversationId, "user", prompt);
-
-    // Save assistant message to memory
+ 
     await addMessage(conversationId, "assistant", aiResponse);
-
-    // Save assistant message to chat service
+ 
     await axios.post(`${process.env.CHAT_SERVICE}/save-message`, {
       conversationId,
       role: "assistant",
       content: aiResponse,
+      images:results.images
     });
-
-    // Update conversation title
+ 
     if (shouldGenerateTitle && title) {
       await axios
         .post(`${process.env.CHAT_SERVICE}/update-conversation`, {
@@ -84,6 +81,7 @@ export const agent = async (req, res) => {
     res.status(200).json({
       content: aiResponse,
       title: shouldGenerateTitle ? title : undefined,
+      images : results.images
     });
  
     void updateMemoryFromTurn({

@@ -20,11 +20,9 @@ const memorySchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-
-// Covers "all memories for a user, most important first".
+ 
 memorySchema.index({ userId: 1, importance: -1, updatedAt: -1 });
-
-// Per-user switch so people can turn memory off (like ChatGPT's setting).
+ 
 const memorySettingSchema = new mongoose.Schema(
   {
     userId: { type: String, required: true, unique: true },

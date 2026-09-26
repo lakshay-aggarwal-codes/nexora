@@ -14,6 +14,9 @@ import {
 import { useState } from "react";
 import useSendMessage from "../hooks/useSendMessage";
 import useSpeechToText from "../hooks/useSpeechToText";
+import { useDispatch } from "react-redux";
+import { addMessage } from "../redux/messageSlice";
+import sendMessage from "../features/sendMessage";
 
 function ChatInput() {
   const [value, setValue] = useState("");
@@ -29,6 +32,9 @@ function ChatInput() {
     setValue("");
     await sendPrompt(prompt, { agent: selectedAgent.toLowerCase() });
   };
+ const dispatch = useDispatch();
+ const data =  await sendMessage(payload)
+ dispatch(addMessage({role:"assistant", content :data.answer, images:data.images}))
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {

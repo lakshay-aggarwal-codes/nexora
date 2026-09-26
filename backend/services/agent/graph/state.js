@@ -9,4 +9,6 @@ export const agentState = Annotation.Root({
   history: Annotation(),
   userId: Annotation(),
   memoryContext: Annotation(),
+  searchResults:Annotation(),
+  images:Annotation(),
 });

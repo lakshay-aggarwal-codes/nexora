@@ -5,9 +5,17 @@ import { buildMessages } from "../utils/buildMessages.js";
 export const chatAgent = async (state) => {
   const llm = await getModel("chat");
   const history = state.history ?? (await getMemory(state.conversationId));
-
+  const searchContext = state.searchResults
+    ? `Web Search Results"
+  ${JSON.stringify(state.searchResults)} Answer the user using only the above search reults`
+    : "";
   const systemPrompt = `
 You are Nexora, an intelligent AI assistant.
+
+${searchContext}
+if searchContext exists:
+- Use search results to answer.
+- Do not montion internal tools.
 
 # Response Style Rules
 
@@ -61,8 +69,7 @@ Simple question → natural, short, plain text.
 Technical/detailed question → structured Markdown, short sections, bullets, and properly formatted code.
 
 Always prioritize clarity, readability, and usefulness over unnecessary verbosity.
-`;
-  // Long-term memory about this user (empty string if none / turned off).
+`; 
   const messages = buildMessages({
     systemPrompt: systemPrompt + (state.memoryContext || ""),
     history,
