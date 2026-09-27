@@ -22,8 +22,9 @@ function useSendMessage() {
   const dispatch = useDispatch();
   const { selectedConversation } = useSelector((state) => state.conversations);
 
-  const sendPrompt = async (prompt) => {
+  const sendPrompt = async (prompt, options = {}) => {
     if (!prompt?.trim() || isSending) return;
+    const { agent } = options;
 
     try {
       setIsSending(true);
@@ -61,6 +62,7 @@ function useSendMessage() {
         prompt,
         conversationId: conversation._id,
         generateTitle: needsTitle,
+        agent,
       });
 
       dispatch(

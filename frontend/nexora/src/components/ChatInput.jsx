@@ -14,10 +14,14 @@ import {
 import { useState } from "react";
 import useSendMessage from "../hooks/useSendMessage";
 import useSpeechToText from "../hooks/useSpeechToText";
+ 
+const AGENT_ID_TO_BACKEND_AGENT = {
+  image: "vision",
+};
 
 function ChatInput() {
   const [value, setValue] = useState("");
-  const [selectedAgent, setSelectedAgent] = useState("Auto");
+  const [selectedAgentId, setSelectedAgentId] = useState("auto");
   const { sendPrompt, isSending } = useSendMessage();
   const { isListening, isSupported, startListening, stopListening } =
     useSpeechToText({ onResult: setValue });
@@ -27,7 +31,9 @@ function ChatInput() {
     if (!prompt || isSending) return;
     if (isListening) stopListening();
     setValue("");
-    await sendPrompt(prompt, { agent: selectedAgent.toLowerCase() });
+    const backendAgent =
+      AGENT_ID_TO_BACKEND_AGENT[selectedAgentId] || selectedAgentId;
+    await sendPrompt(prompt, { agent: backendAgent });
   };
 
   const handleKeyDown = (e) => {
@@ -89,12 +95,12 @@ function ChatInput() {
         <div className="rounded-2xl border border-white/10 bg-[#2f2f2f]">
           <div className="flex w-[80%] gap-2 pr-2 flex-wrap">
             {agents.map((agent) => {
-              const isActive = selectedAgent === agent.label;
+              const isActive = selectedAgentId === agent.id;
               const Icon = agent.icon;
               return (
                 <div
                   key={agent.id}
-                  onClick={() => setSelectedAgent(agent.label)}
+                  onClick={() => setSelectedAgentId(agent.id)}
                   className={`flex cursor-pointer items-center gap-1.5 rounded-full border
         px-3 py-1 text-xs font-medium capitalize transition select-none ${
           isActive

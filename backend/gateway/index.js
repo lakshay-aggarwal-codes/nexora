@@ -9,13 +9,29 @@ import morgan from "morgan";
 import { proxyWithHeader } from "./utils/proxyWithHeader.js";
 dotenv.config();
 
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 8010; 
+const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+if (!process.env.FRONTEND_URL) {
+  console.warn(
+    "[gateway] FRONTEND_URL is not set — defaulting CORS to http://localhost:5173. " +
+      "Set FRONTEND_URL in backend/gateway/.env for other environments.",
+  );
+}
 
 const app = express();
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
-    credentials:true
+    origin(origin, callback) { 
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
+    credentials: true,
   }),
 );
 app.use(morgan("dev"))

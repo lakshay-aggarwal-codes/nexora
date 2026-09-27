@@ -35,12 +35,12 @@ export const login = async (req, res) => {
       }),
       "EX",
       7 * 24 * 60 * 60,
-    );
-
+    ); 
+    const isProd = process.env.NODE_ENV === "production";
     res.cookie("session", sessionId, {
       httpOnly: true,
-      secure: false,
-      sameSite: "strict",
+      secure: isProd,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 

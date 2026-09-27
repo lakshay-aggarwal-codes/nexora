@@ -9,9 +9,41 @@ export const chatAgent = async (state) => {
     ? `Web Search Results"
   ${JSON.stringify(state.searchResults)} Answer the user using only the above search reults`
     : "";
+
+  // The model has no live clock and no reliable sense of "today". Give it
+  // the real current date/time as ground truth so it doesn't guess/hallucinate
+  // one from training data or stale search snippets — this is what backed
+  // the earlier wrong-date bug.
+  const now = new Date();
+  const currentDateTimeInfo = `
+# Current Date & Time (authoritative — use this, do not guess)
+- UTC: ${now.toISOString()}
+- India (IST, UTC+5:30): ${now.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  })}
+If the user asks for the date/time in another location, compute it from the
+UTC value above using that location's standard UTC offset. Never state a
+date/time from memory or from search results — always derive it from the
+values above.
+
+CRITICAL: The "India (IST, UTC+5:30)" line above is already fully computed
+for you — do NOT redo the timezone math yourself. When the user asks for the
+time in India, quote that line's date and time directly rather than
+calculating it from the UTC value. Only calculate an offset yourself for a
+location that isn't already listed above.
+`;
+
   const systemPrompt = `
 You are Nexora, an intelligent AI assistant.
-
+${currentDateTimeInfo}
 ${searchContext}
 if searchContext exists:
 - Use search results to answer.
