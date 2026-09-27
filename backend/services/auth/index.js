@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import router from "./routes/auth.routes.js";
 
@@ -9,6 +10,7 @@ const port = process.env.PORT || 8001; // gateway=8000, auth=8001, chat=8002, ag
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 app.use("/", router);
 
 app.get("/", (req, res) => {

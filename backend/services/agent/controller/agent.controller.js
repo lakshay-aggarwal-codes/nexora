@@ -61,7 +61,7 @@ export const agent = async (req, res) => {
       conversationId,
       role: "assistant",
       content: aiResponse,
-      images:results.images
+      images: graphResult.images
     });
  
     if (shouldGenerateTitle && title) {
@@ -81,7 +81,7 @@ export const agent = async (req, res) => {
     res.status(200).json({
       content: aiResponse,
       title: shouldGenerateTitle ? title : undefined,
-      images : results.images
+      images: graphResult.images
     });
  
     void updateMemoryFromTurn({
