@@ -1,9 +1,11 @@
-import { FileCode2 } from "lucide-react";
+import { FileCode2, X } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { setArtifact } from "../redux/artifactSlice";
+import { useState } from "react";
 
-function MessageBubble({ role, content, artifact }) {
+function MessageBubble({ role, content, artifact, images }) {
   const isUser = role === "user";
+  const [lightBox, setLightBox] = useState(null);
   const dispatch = useDispatch();
 
   return (
@@ -24,16 +26,35 @@ function MessageBubble({ role, content, artifact }) {
           {isUser ? "You" : "N"}
         </div>
 
+        {images.length > 0 && (
+          <div className="flex flex-wrap">
+            {images.map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                loading="lazy"
+                onClick={() => setLightBox(img)}
+                onError={(e) => e.currentTarget.remove()}
+              />
+            ))}
+          </div>
+        )}
+
         <div
           className={`rounded-2xl px-4 py-3 text-[14px] leading-7 ${
-            isUser
-              ? "bg-[#2f2f2f] text-slate-100"
-              : "text-slate-200"
+            isUser ? "bg-[#2f2f2f] text-slate-100" : "text-slate-200"
           }`}
         >
-          <div className="whitespace-pre-wrap">
-            {content}
-          </div>
+          <div className="whitespace-pre-wrap">{content}</div>
+
+          {lightBox && (
+            <div>
+              <button onClick={() => setLightBox(null)}>
+                <X />
+              </button>
+              <img src={lightBox} />
+            </div>
+          )}
 
           {artifact && (
             <button

@@ -71,6 +71,7 @@ function MessageList({ bottomRef }) {
                   role={msg?.role}
                   content={msg?.content}
                   pending={msg?.pending}
+                  images={msg?.images || []}
                   error={msg?.error}
                   showRetry={isLastAssistant}
                   onRetry={() =>
@@ -80,8 +81,7 @@ function MessageList({ bottomRef }) {
               );
             })}
           </div>
-
-          {/* Scroll target */}
+ 
           <div ref={bottomRef} />
         </div>
       )}
