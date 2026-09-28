@@ -5,15 +5,31 @@ import { buildMessages } from "../utils/buildMessages.js";
 export const chatAgent = async (state) => {
   const llm = await getModel("chat");
   const history = state.history ?? (await getMemory(state.conversationId));
-  const searchContext = state.searchResults
-    ? `Web Search Results"
-  ${JSON.stringify(state.searchResults)} Answer the user using only the above search reults`
-    : "";
+ 
+  const hasSearchResults =
+    Array.isArray(state.searchResults) && state.searchResults.length > 0;
+  const searchContext = hasSearchResults
+    ? `# Web Search Results
+Use only the results below to answer. Do not mention internal tools.
 
-  // The model has no live clock and no reliable sense of "today". Give it
-  // the real current date/time as ground truth so it doesn't guess/hallucinate
-  // one from training data or stale search snippets — this is what backed
-  // the earlier wrong-date bug.
+${state.searchResults
+  .map(
+    (r, i) =>
+      `${i + 1}. ${r.title || "Untitled"} (${r.url || "no url"})\n${r.content || ""}`,
+  )
+  .join("\n\n")}
+
+IMPORTANT — formatting your answer:
+- For every specific item, product, or claim you draw from the results
+  above, cite it as a **Markdown link** using the exact URL given, e.g.
+  [HUGO BOSS Men's Watch, 46mm](https://example.com/product-page) — do not
+  just print the plain product name with no link, and do not invent a URL
+  that wasn't given to you.
+- If you list several items, put each on its own bullet point with its link
+  inline like that, not a separate "sources" list at the end.
+`
+    : "";
+ 
   const now = new Date();
   const currentDateTimeInfo = `
 # Current Date & Time (authoritative — use this, do not guess)
@@ -39,15 +55,17 @@ for you — do NOT redo the timezone math yourself. When the user asks for the
 time in India, quote that line's date and time directly rather than
 calculating it from the UTC value. Only calculate an offset yourself for a
 location that isn't already listed above.
+
+If earlier messages in this conversation (including your own previous
+replies) stated a different date or time, IGNORE them completely — they are
+now stale. The block above reflects the actual current moment as of this
+exact reply and always overrides anything said earlier in the chat.
 `;
 
   const systemPrompt = `
 You are Nexora, an intelligent AI assistant.
 ${currentDateTimeInfo}
 ${searchContext}
-if searchContext exists:
-- Use search results to answer.
-- Do not montion internal tools.
 
 # Response Style Rules
 

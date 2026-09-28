@@ -35,7 +35,13 @@ export const login = async (req, res) => {
       }),
       "EX",
       7 * 24 * 60 * 60,
-    ); 
+    );
+
+    // "strict" blocks the cookie on cross-site navigations and breaks once
+    // the frontend and API live on different domains in production.
+    // "lax" works for same-site localhost dev *and* normal top-level
+    // navigation in prod; set NODE_ENV=production (with HTTPS) to switch
+    // to secure cookies.
     const isProd = process.env.NODE_ENV === "production";
     res.cookie("session", sessionId, {
       httpOnly: true,

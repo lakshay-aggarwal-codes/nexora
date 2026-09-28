@@ -9,7 +9,7 @@ import morgan from "morgan";
 import { proxyWithHeader } from "./utils/proxyWithHeader.js";
 dotenv.config();
 
-const port = process.env.PORT || 8010; 
+const port = process.env.PORT || 8010;
 const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
   .split(",")
   .map((o) => o.trim())
@@ -25,7 +25,8 @@ if (!process.env.FRONTEND_URL) {
 const app = express();
 app.use(
   cors({
-    origin(origin, callback) { 
+    origin(origin, callback) {
+      // Allow non-browser tools (curl, server-to-server, etc.) with no Origin header.
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }

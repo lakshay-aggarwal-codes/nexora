@@ -14,7 +14,11 @@ import {
 import { useState } from "react";
 import useSendMessage from "../hooks/useSendMessage";
 import useSpeechToText from "../hooks/useSpeechToText";
- 
+
+// The chip `id`s are the UI's own vocabulary; the backend graph
+// (backend/services/agent/graph/graph.js) expects these exact
+// strings. Only "image" differs (backend calls it "vision") —
+// map it here instead of guessing from the label.
 const AGENT_ID_TO_BACKEND_AGENT = {
   image: "vision",
 };
