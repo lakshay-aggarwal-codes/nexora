@@ -54,7 +54,7 @@ function Sidebar() {
   if (collapse) {
     return (
       <div
-        className="flex flex-col items-center h-screen w-14 bg-[#0d0f14]
+        className="flex flex-col items-center h-screen w-14 bg-[#171717]
         border-r border-white/10 py-4 shrink-0 gap-1"
       >
         <button
@@ -132,7 +132,7 @@ function Sidebar() {
   }
 
   return (
-    <div className="h-full bg-[#0d0f14] border-r border-white/10">
+    <div className="h-full bg-[#171717] border-r border-white/10">
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="flex items-center gap-2.5 px-4 py-4 border-b border-white/6">
@@ -170,9 +170,9 @@ function Sidebar() {
         <div className="px-4 pt-4 pb-1">
           <button
             className="w-full flex items-center justify-center gap-2 text-sm font-medium
-            text-white bg-linear-to-br from-indigo-500 to-violet-700 rounded-xl
-            py-2.5 border-none cursor-pointer hover:opacity-90
-            transition-opacity duration-150"
+            text-slate-100 bg-white/5 border border-white/10 rounded-xl
+            py-2.5 cursor-pointer hover:bg-white/10
+            transition-colors duration-150"
             onClick={handleCreateConversation}
           >
             <Plus size={15} />
